@@ -1,0 +1,121 @@
+---
+- name: Setup Docker Web App and Push to ACR
+  hosts: azurevm
+  become: yes
+
+  vars:
+    acr_name: devenvironmentacr.azurecr.io
+
+  tasks:
+    - name: Update apt
+      apt:
+        update_cache: yes
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Add user to Docker group
+      user:
+        name: azureuser
+        groups: docker
+        append: yes
+
+    - name: Set permissions for Docker socket
+      file:
+        path: /var/run/docker.sock
+        mode: '0666'
+
+    - name: Restart Docker
+      systemd:
+        name: docker
+        state: restarted
+        enabled: true
+
+    - name: Ensure home directory exists
+      file:
+        path: /home/azureuser
+        state: directory
+        mode: '0755'
+
+    - name: Create index.html
+      copy:
+        dest: /home/azureuser/index.html
+        content: |
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+           <meta charset="UTF-8">
+           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+           <title>Hello World</title>
+           <style>
+           body {
+           font-family: Arial, sans-serif;
+           text-align: center;
+           margin-top: 20%;
+           background-color: #f4f4f4;
+           }
+           h1 {
+           color: #333;
+           }
+           </style>
+          </head>
+          <body>
+           <h1>Hello, World!</h1>
+           <p>Welcome to your first deployed web application!</p>
+          </body>
+          </html>
+
+    - name: Create Dockerfile
+      copy:
+        dest: /home/azureuser/Dockerfile
+        content: |
+          FROM nginx:latest
+          COPY . /usr/share/nginx/html
+          EXPOSE 80
+          CMD ["nginx", "-g", "daemon off;"]
+
+    - name: Build Docker image
+      command: docker build -t hello-world-app .
+      args:
+        chdir: /home/azureuser
+
+    - name: Run Docker container
+      command: docker run -d -p 80:80 hello-world-app
+
+    - name: Copy Service Principal
+      copy:
+        dest: /home/azureuser/
+        src: ./sp_credentials.json
+    
+    - name: Read the JSON file
+      set_fact:
+        config_data: "{{ lookup('file', 'sp_credentials.json') | from_json }}"
+
+    - name: Set variables from JSON data
+      set_fact:
+        clientId: "{{ config_data.clientId }}"
+        clientSecret: "{{ config_data.clientSecret }}"
+        tenantId: "{{ config_data.tenantId }}"
+
+    - name: Debug credentials
+      debug:
+        msg: "ClientID: {{ clientId }}, TenantID: {{ tenantId }}"
+
+    - name: Install Azure CLI
+      shell: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+    - name: AZ login using service principal
+      command: az login --service-principal --username {{ clientId }} --password {{ clientSecret }} --tenant {{ tenantId }}
+
+    - name: ACR Login
+      shell: az acr login --name {{ acr_name }}
+      args:
+        executable: /bin/bash
+
+    - name: Tag Docker image
+      shell: docker tag hello-world-app {{ acr_name }}/hello-world-app:latest
+
+    - name: Push Docker image
+      shell: docker push {{ acr_name }}/hello-world-app:latest
