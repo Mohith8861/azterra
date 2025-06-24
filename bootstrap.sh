@@ -50,6 +50,5 @@ curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.
 az aks get-credentials --resource-group DevEnvironment-RG --name Dev-AKS --overwrite-existing
 kubectl apply -f deployment.yaml
 
-echo "Health Check"
-sudo apt update && \sudo apt install -y wget apt-transport-https software-properties-common && \wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb && \sudo dpkg -i packages-microsoft-prod.deb && \sudo apt update && \sudo apt install -y powershell
-pwsh health-check.ps1
+echo "Cluster Health Check"
+pwsh ./health-check.ps1
