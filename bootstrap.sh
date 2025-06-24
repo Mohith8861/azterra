@@ -44,3 +44,12 @@ ssh -i Dev-VM_key -o StrictHostKeyChecking=no azureuser@$VM_IP "echo 'SSH succes
 # === Phase 4: Run Ansible Playbook ===
 echo "[*] Running Ansible Playbook..."
 ansible-playbook -i inventory main.yaml
+
+echo "Applying deployment to Kubernetes"
+curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \chmod +x kubectl && \sudo mv kubectl /usr/local/bin/ && \kubectl version --client
+az aks get-credentials --resource-group DevEnvironment-RG --name Dev-AKS --overwrite-existing
+kubectl apply -f deployment.yaml
+
+echo "Health Check"
+sudo apt update && \sudo apt install -y wget apt-transport-https software-properties-common && \wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb && \sudo dpkg -i packages-microsoft-prod.deb && \sudo apt update && \sudo apt install -y powershell
+pwsh health-check.ps1
