@@ -51,4 +51,5 @@ az aks get-credentials --resource-group DevEnvironment-RG --name Dev-AKS --overw
 kubectl apply -f deployment.yaml
 
 echo "Cluster Health Check"
+sudo apt update && \sudo apt install -y wget apt-transport-https software-properties-common && \wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb && \sudo dpkg -i packages-microsoft-prod.deb && \sudo apt update && \sudo apt install -y powershell
 pwsh ./health-check.ps1
