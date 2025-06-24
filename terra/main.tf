@@ -149,6 +149,13 @@ resource "azurerm_kubernetes_cluster" "res-9" {
     azurerm_resource_group.res-0
   ]
 }
+
+resource "azurerm_role_assignment" "aks_acr_pull" {
+  scope                = azurerm_container_registry.your_acr.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_kubernetes_cluster.res-9.kubelet_identity[0].object_id
+}
+
 # ---------------------------------------------------------------
 resource "azurerm_network_interface" "res-13" {
   location            = "eastus"
