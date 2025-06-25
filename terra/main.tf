@@ -269,7 +269,7 @@ resource "azurerm_storage_account" "res-22" {
   ]
 }
 resource "azurerm_storage_container" "res-24" {
-  name               = "misc"
+  name               = "tfstate"
   storage_account_id = "/subscriptions/86bdb61f-551b-4581-bd9d-d6d174e744dc/resourceGroups/DevEnvironment-RG/providers/Microsoft.Storage/storageAccounts/devstorage8861"
   depends_on = [
     azurerm_storage_account.res-22
