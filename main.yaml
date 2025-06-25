@@ -119,3 +119,5 @@
 
     - name: Push Docker image
       shell: docker push {{ acr_name }}/hello-world-app:latest
+
+

@@ -4,24 +4,11 @@
 echo "[*] Generating SSH key pair..."
 ssh-keygen -t rsa -b 4096 -f Dev-VM_key -N ""
 
-# Create the service principal with Contributor role
-SP_NAME="DevVM-SP"
-SUBSCRIPTION_ID=$(az account show --query id -o tsv)
-SP_OUTPUT_FILE="sp_credentials.json"
-
-az ad sp create-for-rbac \
-  --name $SP_NAME \
-  --role contributor \
-  --scopes /subscriptions/$SUBSCRIPTION_ID \
-  --sdk-auth > $SP_OUTPUT_FILE
-
-echo "✅ Service Principal created and saved to $SP_OUTPUT_FILE"
-
 # === Phase 2: Terraform Init and Apply ===
 echo "[*] Initializing and applying Terraform..."
 export TF_VAR_public_key_path=$(pwd)/Dev-VM_key.pub
 cd terra
-terraform init
+# terraform init
 terraform apply -auto-approve
 
 # === Phase 3: Extract IP and Setup Inventory ===
@@ -50,6 +37,6 @@ curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.
 az aks get-credentials --resource-group DevEnvironment-RG --name Dev-AKS --overwrite-existing
 kubectl apply -f deployment.yaml
 
-echo "Cluster Health Check"
-sudo apt update && \sudo apt install -y wget apt-transport-https software-properties-common && \wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb && \sudo dpkg -i packages-microsoft-prod.deb && \sudo apt update && \sudo apt install -y powershell
-pwsh ./health-check.ps1
+# echo "Cluster Health Check"
+# apt update && \ apt install -y wget apt-transport-https software-properties-common && \wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb && \sudo dpkg -i packages-microsoft-prod.deb && \sudo apt update && \sudo apt install -y powershell
+# pwsh ./health-check.ps1

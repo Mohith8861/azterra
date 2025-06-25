@@ -2,3 +2,4 @@
 .terraform*
 terra/.terraform/*
 terra/.terraform*
+sp_credentials.json

@@ -252,41 +252,41 @@ resource "azurerm_subnet" "res-21" {
     azurerm_virtual_network.res-19
   ]
 }
-#-------------------------------------------------
-resource "azurerm_storage_account" "res-22" {
-  account_replication_type        = "LRS"
-  account_tier                    = "Standard"
-  allow_nested_items_to_be_public = false
-  location                        = "eastus"
-  name                            = "devstorage8861"
-  resource_group_name             = "DevEnvironment-RG"
-  tags = {
-    Owner   = "azure-dev-user"
-    Project = "DevEnvironment"
-  }
-  depends_on = [
-    azurerm_resource_group.res-0
-  ]
-}
-resource "azurerm_storage_container" "res-24" {
-  name               = "tfstate"
-  storage_account_id = "/subscriptions/86bdb61f-551b-4581-bd9d-d6d174e744dc/resourceGroups/DevEnvironment-RG/providers/Microsoft.Storage/storageAccounts/devstorage8861"
-  depends_on = [
-    azurerm_storage_account.res-22
-  ]
-}
-resource "azurerm_storage_account_queue_properties" "res-26" {
-  storage_account_id = azurerm_storage_account.res-22.id
-  hour_metrics {
-    version = "1.0"
-  }
-  logging {
-    delete  = false
-    read    = false
-    version = "1.0"
-    write   = false
-  }
-  minute_metrics {
-    version = "1.0"
-  }
-}
+# #-------------------------------------------------
+# resource "azurerm_storage_account" "res-22" {
+#   account_replication_type        = "LRS"
+#   account_tier                    = "Standard"
+#   allow_nested_items_to_be_public = false
+#   location                        = "eastus"
+#   name                            = "devstorage8861"
+#   resource_group_name             = "DevEnvironment-RG"
+#   tags = {
+#     Owner   = "azure-dev-user"
+#     Project = "DevEnvironment"
+#   }
+#   depends_on = [
+#     azurerm_resource_group.res-0
+#   ]
+# }
+# resource "azurerm_storage_container" "res-24" {
+#   name               = "tfstate"
+#   storage_account_id = "/subscriptions/86bdb61f-551b-4581-bd9d-d6d174e744dc/resourceGroups/DevEnvironment-RG/providers/Microsoft.Storage/storageAccounts/devstorage8861"
+#   depends_on = [
+#     azurerm_storage_account.res-22
+#   ]
+# }
+# resource "azurerm_storage_account_queue_properties" "res-26" {
+#   storage_account_id = azurerm_storage_account.res-22.id
+#   hour_metrics {
+#     version = "1.0"
+#   }
+#   logging {
+#     delete  = false
+#     read    = false
+#     version = "1.0"
+#     write   = false
+#   }
+#   minute_metrics {
+#     version = "1.0"
+#   }
+# }
