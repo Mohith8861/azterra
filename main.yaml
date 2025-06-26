@@ -41,40 +41,13 @@
 
     - name: Create index.html
       copy:
-        dest: /home/azureuser/index.html
-        content: |
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-           <meta charset="UTF-8">
-           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-           <title>Hello World</title>
-           <style>
-           body {
-           font-family: Arial, sans-serif;
-           text-align: center;
-           margin-top: 20%;
-           background-color: #f4f4f4;
-           }
-           h1 {
-           color: #333;
-           }
-           </style>
-          </head>
-          <body>
-           <h1>Hello, World!</h1>
-           <p>Welcome to your first deployed web application!</p>
-          </body>
-          </html>
+        dest: /home/azureuser/
+        src: ./index.html
 
     - name: Create Dockerfile
       copy:
-        dest: /home/azureuser/Dockerfile
-        content: |
-          FROM nginx:latest
-          COPY . /usr/share/nginx/html
-          EXPOSE 80
-          CMD ["nginx", "-g", "daemon off;"]
+        dest: /home/azureuser/
+        src: ./Dockerfile
 
     - name: Build Docker image
       command: docker build -t hello-world-app .

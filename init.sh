@@ -1,5 +1,6 @@
 echo "[*] Initializing and applying Terraform..."
 export TF_VAR_public_key_path=$(pwd)/Dev-VM_key.pub
+
 cd terra
 terraform init
 cd ..

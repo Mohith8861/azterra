@@ -1,3 +1,7 @@
+cd terra
+terraform destroy
+cd ..
+
 rm Dev-VM_key
 rm Dev-VM_key.pub
 rm inventory

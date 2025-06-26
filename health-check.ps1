@@ -1,51 +1,43 @@
 function Check-Nodes {
- Write-Host "Checking Kubernetes Nodes..."
- $nodes = kubectl get nodes --no-headers | ForEach-Object {
- $fields = $_ -split '\s+'
- [PSCustomObject]@{
- NodeName = $fields[0]
- Status = $fields[1]
- }
- }
- $allHealthy = $true
- foreach ($node in $nodes) {
-     if ($node.Status -ne "Ready") {
- Write-Error "Node $($node.NodeName) is not healthy. Status: $($node.Status)"
- $allHealthy = $false
- } else {
- Write-Host "Node $($node.NodeName) is healthy."
- }
- }
- if (-not $allHealthy) {
- exit 1
- }
+    Write-Host "Checking Kubernetes Nodes..."
+    $nodes = kubectl get nodes -o json | ConvertFrom-Json
+    $allHealthy = $true
+
+    foreach ($node in $nodes.items) {
+        $status = $node.status.conditions | Where-Object { $_.type -eq "Ready" }
+        if ($status.status -ne "True") {
+            Write-Error "Node $($node.metadata.name) is not Ready."
+            $allHealthy = $false
+        } else {
+            Write-Host "Node $($node.metadata.name) is healthy."
+        }
+    }
+
+    if (-not $allHealthy) {
+        exit 1
+    }
 }
 
-# Function to check the health of Kubernetes pods
 function Check-Pods {
- Write-Host "Checking Kubernetes Pods..."
- $pods = kubectl get pods --all-namespaces --no-headers | ForEach-Object {
- $fields = $_ -split '\s+'
- [PSCustomObject]@{
- PodName = $fields[1]
- Status = $fields[2]
- }
- }
- $allHealthy = $true
- foreach ($pod in $pods) {
- if ($pod.Status -ne "Running" -and $pod.Status -ne "Completed") {
- Write-Error "Pod $($pod.PodName) is not healthy. Status: $($pod.Status)"
- $allHealthy = $false
- } else {
- Write-Host "Pod $($pod.PodName) is healthy."
+    Write-Host "Checking Kubernetes Pods..."
+    $pods = kubectl get pods --all-namespaces -o json | ConvertFrom-Json
+    $allHealthy = $true
 
-  }
- }
- if (-not $allHealthy) {
- exit 1
- }
+    foreach ($pod in $pods.items) {
+        $status = $pod.status.phase
+        if ($status -ne "Running" -and $status -ne "Succeeded") {
+            Write-Error "Pod $($pod.metadata.name) in namespace $($pod.metadata.namespace) is not healthy. Status: $status"
+            $allHealthy = $false
+        } else {
+            Write-Host "Pod $($pod.metadata.name) in namespace $($pod.metadata.namespace) is healthy."
+        }
+    }
+
+    if (-not $allHealthy) {
+        exit 1
+    }
 }
-# Run the checks
+
 Check-Nodes
 Check-Pods
 Write-Host "All Kubernetes components are healthy."
